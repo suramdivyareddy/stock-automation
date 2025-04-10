@@ -1,0 +1,33 @@
+name: Daily Stock Sync
+
+on:
+  schedule:
+    - cron: '0 13 * * *'   # Every day at 9AM EST (13:00 UTC)
+  workflow_dispatch:        # Allows manual trigger from GitHub
+
+jobs:
+  run-stock-sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create .env from GitHub secrets
+        run: |
+          echo "SHEET_ID=${{ secrets.SHEET_ID }}" >> .env
+          echo "ALPHA_VANTAGE_API_KEY=${{ secrets.ALPHA_VANTAGE_API_KEY }}" >> .env
+
+      - name: Run index.js (main script)
+        run: node index.js
+
+      - name: Run test.js (validation script)
+        run: node test.js
